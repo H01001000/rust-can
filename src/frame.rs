@@ -98,3 +98,54 @@ impl Frame {
         })
     }
 }
+
+#[cfg(feature = "embedded-can-compat")]
+#[cfg_attr(docsrs, doc(cfg(feature = "embedded-can-compat")))]
+impl embedded_can::Frame for Frame {
+    fn new(id: impl Into<embedded_can::Id>, data: &[u8]) -> Option<Self> {
+        let id: embedded_can::Id = id.into();
+        if data.len() > 8 {
+            return None;
+        }
+        let id: Id = id.into();
+
+        Some(Self {
+            id: id,
+            data: Bytes::copy_from_slice(data),
+        })
+    }
+
+    fn new_remote(id: impl Into<embedded_can::Id>, dlc: usize) -> Option<Self> {
+        let id = id.into();
+        if dlc > 8 {
+            return None;
+        }
+        let id: Id = id.into();
+        id.set_flags(IdentifierFlags::REMOTE);
+
+        Some(Self {
+            id: id,
+            data: Bytes::new(),
+        })
+    }
+
+    fn is_extended(&self) -> bool {
+        self.id.flags().contains(IdentifierFlags::EXTENDED)
+    }
+
+    fn is_remote_frame(&self) -> bool {
+        self.id.flags().contains(IdentifierFlags::REMOTE)
+    }
+
+    fn id(&self) -> embedded_can::Id {
+        self.id.into()
+    }
+
+    fn dlc(&self) -> usize {
+        self.data.len()
+    }
+
+    fn data(&self) -> &[u8] {
+        &self.data
+    }
+}

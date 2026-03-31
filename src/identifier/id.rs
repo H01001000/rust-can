@@ -348,6 +348,33 @@ impl Into<embedded_can::Id> for Id {
     }
 }
 
+#[cfg(feature = "embedded-can-compat")]
+#[cfg_attr(docsrs, doc(cfg(feature = "embedded-can-compat")))]
+impl From<embedded_can::StandardId> for StandardId {
+    fn from(id: embedded_can::StandardId) -> Self {
+        StandardId::new(id.as_raw()).unwrap()
+    }
+}
+
+#[cfg(feature = "embedded-can-compat")]
+#[cfg_attr(docsrs, doc(cfg(feature = "embedded-can-compat")))]
+impl From<embedded_can::ExtendedId> for ExtendedId {
+    fn from(id: embedded_can::ExtendedId) -> Self {
+        ExtendedId::new(id.as_raw()).unwrap()
+    }
+}
+
+#[cfg(feature = "embedded-can-compat")]
+#[cfg_attr(docsrs, doc(cfg(feature = "embedded-can-compat")))]
+impl From<embedded_can::Id> for Id {
+    fn from(id: embedded_can::Id) -> Self {
+        match id {
+            embedded_can::Id::Standard(sid) => Id::Standard(sid.into()),
+            embedded_can::Id::Extended(eid) => Id::Extended(eid.into()),
+        }
+    }
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use crate::constants::tests::arb_identifier_flags;
